@@ -1,6 +1,6 @@
-# SushiSwap 🍣
+# MetaSwap V0.1
 
-https://app.sushiswap.org. Feel free to read the code. More details coming soon.
+https://metaswap.app. Feel free to read the code. More details coming soon.
 
 ## Deployed Contracts / Hash
 
