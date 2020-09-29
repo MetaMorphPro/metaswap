@@ -59,7 +59,7 @@ contract MasterChef is Ownable {
     }
 
     // The Meta TOKEN!
-    MetaToken public meta;
+    IERC20 public meta;
     // Dev address.
     address public devaddr;
     // Block number when bonus Meta period ends.
@@ -85,7 +85,7 @@ contract MasterChef is Ownable {
     event EmergencyWithdraw(address indexed user, uint256 indexed pid, uint256 amount);
 
     constructor(
-        MetaToken _token,
+        IERC20 _token,
         address _devaddr,
         uint256 _sushiPerBlock,
         uint256 _startBlock,
