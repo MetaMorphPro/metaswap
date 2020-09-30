@@ -7,7 +7,7 @@ import "./uniswapv2/interfaces/IUniswapV2Pair.sol";
 import "./uniswapv2/interfaces/IUniswapV2Factory.sol";
 
 
-contract MetaMaker {
+contract MetmMaker {
     using SafeMath for uint256;
 
     IUniswapV2Factory public factory;
@@ -29,7 +29,7 @@ contract MetaMaker {
         pair.transfer(address(pair), pair.balanceOf(address(this)));
         pair.burn(address(this));
         uint256 wethAmount = _toWETH(token0) + _toWETH(token1);
-        _toMeta(wethAmount);
+        _toMetm(wethAmount);
     }
 
     function _toWETH(address token) internal returns (uint256) {
@@ -61,7 +61,7 @@ contract MetaMaker {
         return amountOut;
     }
 
-    function _toMeta(uint256 amountIn) internal {
+    function _toMetm(uint256 amountIn) internal {
         IUniswapV2Pair pair = IUniswapV2Pair(factory.getPair(weth, meta));
         (uint reserve0, uint reserve1,) = pair.getReserves();
         address token0 = pair.token0();
