@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/EnumerableSet.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-
+import "IToken.sol";
 
 interface IMigratorChef {
     // Perform LP token migration from legacy UniswapV2 to SushiSwap.
@@ -58,7 +58,7 @@ contract MasterChef is Ownable {
     }
 
     // The Metm TOKEN!
-    IERC20 public metm;
+    IToken public metm;
     // Dev address.
     address public devaddr;
     // Block number when bonus metm period ends.
@@ -86,11 +86,11 @@ contract MasterChef is Ownable {
     constructor(
         address _token,
         address _devaddr,
-        uint256 _sushiPerBlock,
+        uint256 _metmPerBlock,
         uint256 _startBlock,
         uint256 _bonusEndBlock
     ) public {
-        metm = _token; //TODO:  INSTANCIATE
+        metm = IToken(_token); //0x07b112717984cb16a3cddd6e917fa642cbc4a0a7
         devaddr = _devaddr;
         metmPerBlock = _metmPerBlock;
         bonusEndBlock = _bonusEndBlock;
@@ -113,7 +113,7 @@ contract MasterChef is Ownable {
             lpToken: _lpToken,
             allocPoint: _allocPoint,
             lastRewardBlock: lastRewardBlock,
-            accSushiPerShare: 0
+            accMetmPerShare: 0
         }));
     }
 
@@ -164,8 +164,8 @@ contract MasterChef is Ownable {
         uint256 lpSupply = pool.lpToken.balanceOf(address(this));
         if (block.number > pool.lastRewardBlock && lpSupply != 0) {
             uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
-            uint256 metmReward = multiplier.mul(metaPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
-            accMetmPerShare = accMetmPerShare.add(metaReward.mul(1e12).div(lpSupply));
+            uint256 metmReward = multiplier.mul(metmPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
+            accMetmPerShare = accMetmPerShare.add(metmReward.mul(1e12).div(lpSupply));
         }
         return user.amount.mul(accMetmPerShare).div(1e12).sub(user.rewardDebt);
     }
@@ -190,10 +190,10 @@ contract MasterChef is Ownable {
             return;
         }
         uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
-        uint256 metaReward = multiplier.mul(metaPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
-        metm.mint(devaddr, metaReward.div(10));
-        metm.mint(address(this), metaReward);
-        pool.accMetmPerShare = pool.accMetmPerShare.add(metaReward.mul(1e12).div(lpSupply));
+        uint256 metmReward = multiplier.mul(metmPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
+        metm.mint(devaddr, metmReward.div(10));
+        metm.mint(address(this), metmReward);
+        pool.accMetmPerShare = pool.accMetmPerShare.add(metmReward.mul(1e12).div(lpSupply));
         pool.lastRewardBlock = block.number;
     }
 
@@ -236,9 +236,9 @@ contract MasterChef is Ownable {
         user.rewardDebt = 0;
     }
 
-    // Safe meta transfer function, just in case if rounding error causes pool to not have enough meta.
+    // Safe metm transfer function, just in case if rounding error causes pool to not have enough metm.
     function safeMetmTransfer(address _to, uint256 _amount) internal {
-        uint256 bal = sushi.balanceOf(address(this));
+        uint256 bal = metm.balanceOf(address(this));
         if (_amount > bal) {
             metm.transfer(_to, bal);
         } else {
